@@ -1,0 +1,53 @@
+name: Build Lody icons APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build debug APK
+        run: ./gradlew app:assembleDebug
+
+      - name: Stage APK
+        run: |
+          mkdir -p artifacts
+          find app/build/outputs/apk/app/debug -name '*.apk' -exec cp {} artifacts/Lawnicons-Lody-Raft-debug.apk \;
+          test -s artifacts/Lawnicons-Lody-Raft-debug.apk
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Lawnicons-Lody-Raft-debug
+          path: artifacts/Lawnicons-Lody-Raft-debug.apk
+
+      - name: Publish downloadable prerelease
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="lawnicons-preview-${GITHUB_RUN_ID}"
+          gh release create "$tag" artifacts/Lawnicons-Lody-Raft-debug.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Lawnicons Lody and Raft preview" \
+            --notes "Debug APK generated from commit $GITHUB_SHA." \
+            --prerelease
+          echo "Download: https://github.com/${GITHUB_REPOSITORY}/releases/download/${tag}/Lawnicons-Lody-Raft-debug.apk" >> "$GITHUB_STEP_SUMMARY"
