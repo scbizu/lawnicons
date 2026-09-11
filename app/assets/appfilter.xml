@@ -15004,6 +15004,7 @@
   <item component="ComponentInfo{ca.radioplayer.android/ca.radioplayer.android.IntroActivity}" drawable="radioplayer" name="Radioplayer" />
   <item component="ComponentInfo{br.com.radios.radiosmobile.radiosnet/br.com.radios.radiosmobile.radiosnet.activity.MainActivity}" drawable="radiosnet" name="RadiosNet" />
   <item component="ComponentInfo{sk.o2.radost/sk.o2.radost.MainActivity}" drawable="radost" name="Radosť" />
+  <item component="ComponentInfo{build.raft.app/build.raft.app.MainActivity}" drawable="raft" name="Raft" />
   <item component="ComponentInfo{br.com.drogaraia/br.com.raiadrogasil.MainActivity}" drawable="raia" name="Raia" />
   <item component="ComponentInfo{it.raiffeisen.app/it.raiffeisen.app.ui.userAccounts.UserAccountsActivity}" drawable="raiffeisen_bank" name="Raiffeisen" />
   <item component="ComponentInfo{ba.raiffeisenbank.mobile.prod/ba.raiffeisenbank.mobile.activities.mobrix.SplashActivity}" drawable="raiffeisen_bank" name="Raiffeisen Bank ~~ Райффайзен Банк" />
