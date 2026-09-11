@@ -24,30 +24,48 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      - name: Build debug APK
-        run: ./gradlew app:assembleDebug
+      - name: Restore Lody signing key
+        env:
+          LODY_KEYSTORE_BASE64: ${{ secrets.LODY_KEYSTORE_BASE64 }}
+          LODY_KEYSTORE_PASSWORD: ${{ secrets.LODY_KEYSTORE_PASSWORD }}
+          LODY_KEY_ALIAS: ${{ secrets.LODY_KEY_ALIAS }}
+          LODY_KEY_PASSWORD: ${{ secrets.LODY_KEY_PASSWORD }}
+        run: |
+          test -n "$LODY_KEYSTORE_BASE64"
+          umask 077
+          printf '%s' "$LODY_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/lawnicons-lody.p12"
+          {
+            printf 'storePassword=%s\n' "$LODY_KEYSTORE_PASSWORD"
+            printf 'keyAlias=%s\n' "$LODY_KEY_ALIAS"
+            printf 'keyPassword=%s\n' "$LODY_KEY_PASSWORD"
+            printf 'storeFile=%s\n' "$RUNNER_TEMP/lawnicons-lody.p12"
+            printf 'storeType=PKCS12\n'
+          } > keystore.properties
+
+      - name: Build signed Lody APK
+        run: ./gradlew app:assembleLodyDebug
 
       - name: Stage APK
         run: |
           mkdir -p artifacts
-          find app/build/outputs/apk/app/debug -name '*.apk' -exec cp {} artifacts/Lawnicons-Lody-Raft-debug.apk \;
-          test -s artifacts/Lawnicons-Lody-Raft-debug.apk
+          find app/build/outputs/apk/lody/debug -name '*.apk' -exec cp {} artifacts/Lawnicons-Lody-Raft.apk \;
+          test -s artifacts/Lawnicons-Lody-Raft.apk
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v7
         with:
-          name: Lawnicons-Lody-Raft-debug
-          path: artifacts/Lawnicons-Lody-Raft-debug.apk
+          name: Lawnicons-Lody-Raft
+          path: artifacts/Lawnicons-Lody-Raft.apk
 
       - name: Publish downloadable prerelease
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag="lawnicons-preview-${GITHUB_RUN_ID}"
-          gh release create "$tag" artifacts/Lawnicons-Lody-Raft-debug.apk \
+          gh release create "$tag" artifacts/Lawnicons-Lody-Raft.apk \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "Lawnicons Lody and Raft preview" \
-            --notes "Debug APK generated from commit $GITHUB_SHA." \
+            --notes "Signed custom APK generated from commit $GITHUB_SHA. Package: app.lawnchair.lawnicons.lody" \
             --prerelease
-          echo "Download: https://github.com/${GITHUB_REPOSITORY}/releases/download/${tag}/Lawnicons-Lody-Raft-debug.apk" >> "$GITHUB_STEP_SUMMARY"
+          echo "Download: https://github.com/${GITHUB_REPOSITORY}/releases/download/${tag}/Lawnicons-Lody-Raft.apk" >> "$GITHUB_STEP_SUMMARY"

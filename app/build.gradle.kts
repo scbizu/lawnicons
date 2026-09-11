@@ -47,6 +47,7 @@ android {
             keyPassword = keystoreProperties["keyPassword"].toString()
             storeFile = rootProject.file(keystoreProperties["storeFile"].toString())
             storePassword = keystoreProperties["storePassword"].toString()
+            keystoreProperties.getProperty("storeType")?.let { storeType = it }
         }
     } catch (ignored: Exception) {
         signingConfigs["debug"]
@@ -74,8 +75,16 @@ android {
             dimension = "product"
             resValue("string", "apps_name", "Lawnicons")
         }
+        create("lody") {
+            dimension = "product"
+            applicationIdSuffix = ".lody"
+            resValue("string", "apps_name", "Lawnicons Lody")
+        }
     }
     sourceSets.getByName("app") {
+        res.directories.add("src/runtime/res")
+    }
+    sourceSets.getByName("lody") {
         res.directories.add("src/runtime/res")
     }
 
